@@ -65,16 +65,53 @@
 
 (defn exhibits-oddity-5? [x]
   (unless-mac-2 (even? x)
-              (println "Way odd dude")))
+                (println "Way odd dude")))
 
 (exhibits-oddity-5? 10)
 (exhibits-oddity-5? 11)
 
+(defmacro infix [expr]
+  (let [[left op right] expr]
+    (list op left right)))
 
+(macroexpand '(infix (+ 1 2)))
+;; doesnt work with 3 arguments boooo
+(macroexpand '(infix (+ 1 2 3)))
+(macroexpand '(infix (1 + 2)))
 
+(defmacro randomly [& exprs]
+  (let [len (count exprs)
+        index (rand-int len)
+        conditions (map #(list '= index %) (range len))]
+    `(cond ~@(interleave conditions exprs))))
 
+(macroexpand '(randomly (println "arg1") (println "arg2") (println "arg3")))
 
+(defn check-credentials [username password]
+  true)
 
+(defmacro defwebmethod [name args & exprs]
+  `(defn ~name [{:keys ~args}]
+     ~@exprs))
+
+(defwebmethod login-user [username password]
+  (if (check-credentials username password)
+    (str "welcome " username ", " password " still correct")
+    (str "login failed")))
+
+(def request {:username "matt" :password "40"})
+
+(login-user request)
+
+(defmacro assert-ture [test-expr]
+  (let [[operator lhs rhs] test-expr]
+    `(let [lhsv# ~lhs rhsv# ~rhs ret# !~test-expr]
+       (if-not ret#
+         (throw (RuntimeException. (str '~lhs " is not " '~operator " " rhsv#)))
+         true))))
+
+(macroexpand '(assert-true (>= (* 2 4) (/ 18 2))))
+(macroexpand-1 '(assert-true (>= (* 2 4) (/ 18 2))))
 
 
 
