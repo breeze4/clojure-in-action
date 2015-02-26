@@ -1,127 +1,127 @@
-(ns cia.ch6)
+;; (ns cia.ch6)
 
-;; (def adi (atom 0))
+;; ;; (def adi (atom 0))
 
-;; (defn on-change [the-key the-ref old-value new-value]
-;;   (println "Hey, seeing change from" old-value "to" new-value))
+;; ;; (defn on-change [the-key the-ref old-value new-value]
+;; ;;   (println "Hey, seeing change from" old-value "to" new-value))
 
-;; (add-watch adi :adi-watcher on-change)
+;; ;; (add-watch adi :adi-watcher on-change)
 
-;; @adi
-;; (swap! adi inc)
+;; ;; @adi
+;; ;; (swap! adi inc)
 
-;; (remove-watch adi :adi-watcher)
-;; (swap! adi inc)
+;; ;; (remove-watch adi :adi-watcher)
+;; ;; (swap! adi inc)
 
-(defn long-calculation [num1 num2]
-  (Thread/sleep 5000)
-  (* num1 num2))
+;; (defn long-calculation [num1 num2]
+;;   (Thread/sleep 5000)
+;;   (* num1 num2))
 
-(defn long-run []
-  (let [x (long-calculation 11 13)
-        y (long-calculation 13 17)
-        z (long-calculation 17 19)]
-    (* x y z)))
+;; (defn long-run []
+;;   (let [x (long-calculation 11 13)
+;;         y (long-calculation 13 17)
+;;         z (long-calculation 17 19)]
+;;     (* x y z)))
 
-;; (time (long-run))
+;; ;; (time (long-run))
 
-(defn fast-run []
-  (let [x (future (long-calculation 11 13))
-        y (future (long-calculation 13 17))
-        z (future (long-calculation 17 19))]
-    (* @x @y @z)))
+;; (defn fast-run []
+;;   (let [x (future (long-calculation 11 13))
+;;         y (future (long-calculation 13 17))
+;;         z (future (long-calculation 17 19))]
+;;     (* @x @y @z)))
 
-(time (fast-run))
+;; (time (fast-run))
 
 
-;; altering refs - 3 options:
-;; ref-set
-;; alter
-;; commute
-(def all-users (ref {}))
+;; ;; altering refs - 3 options:
+;; ;; ref-set
+;; ;; alter
+;; ;; commute
+;; (def all-users (ref {}))
 
-(deref all-users)
-@all-users
+;; (deref all-users)
+;; @all-users
 
-(dosync
- (ref-set all-users {}))
+;; (dosync
+;;  (ref-set all-users {}))
 
-(defn new-user [id login monthly-budget]
-  {:id id
-   :login login
-   :monthly-budget monthly-budget
-   :total-expenses 0})
+;; (defn new-user [id login monthly-budget]
+;;   {:id id
+;;    :login login
+;;    :monthly-budget monthly-budget
+;;    :total-expenses 0})
 
-(defn add-new-user [login budget-amount]
-  (dosync
-   (let [current-number (count @all-users)
-         user (new-user (inc current-number) login budget-amount)]
-     (alter all-users assoc login user))))
+;; (defn add-new-user [login budget-amount]
+;;   (dosync
+;;    (let [current-number (count @all-users)
+;;          user (new-user (inc current-number) login budget-amount)]
+;;      (alter all-users assoc login user))))
 
-;; When the alter function is applied, it checks to see if the value of the ref has changed because of another committed transaction.
-;; This causes the current transaction to fail and for it to be retried.
-;; The commute function doesn’t behave this way; instead, execution proceeds forward
-;; and all calls to commute are handled at the end of the transaction.
-;; (commute ref function & args)
+;; ;; When the alter function is applied, it checks to see if the value of the ref has changed because of another committed transaction.
+;; ;; This causes the current transaction to fail and for it to be retried.
+;; ;; The commute function doesn’t behave this way; instead, execution proceeds forward
+;; ;; and all calls to commute are handled at the end of the transaction.
+;; ;; (commute ref function & args)
 
-;; agents
+;; ;; agents
 
-(def total-cpu-time (agent 0))
+;; (def total-cpu-time (agent 0))
 
-(deref total-cpu-time)
+;; (deref total-cpu-time)
 
-@total-cpu-time
+;; @total-cpu-time
 
-(send total-cpu-time + 700)
+;; (send total-cpu-time + 700)
 
-@total-cpu-time
+;; @total-cpu-time
 
-(dotimes [n 100]
-  (send total-cpu-time + n)
-  ;;   (println @total-cpu-time)
-  (await total-cpu-time))
+;; (dotimes [n 100]
+;;   (send total-cpu-time + n)
+;;   ;;   (println @total-cpu-time)
+;;   (await total-cpu-time))
 
-(def bad-agent (agent 10))
+;; (def bad-agent (agent 10))
 
-(send bad-agent / 0)
+;; (send bad-agent / 0)
 
-@bad-agent
+;; @bad-agent
 
-(agent-errors bad-agent)
+;; (agent-errors bad-agent)
 
-(require '[clojure.string :as str])
-(let [e (first (agent-errors bad-agent))
-      st (.getStackTrace e)]
-  (println (.getMessage e))
-  (println (str/join "\n" st)))
+;; (require '[clojure.string :as str])
+;; (let [e (first (agent-errors bad-agent))
+;;       st (.getStackTrace e)]
+;;   (println (.getMessage e))
+;;   (println (str/join "\n" st)))
 
-(clear-agent-errors bad-agent)
+;; (clear-agent-errors bad-agent)
 
-(let [e (first (agent-errors bad-agent))
-      st (.getStackTrace e)]
-  (println (.getMessage e))
-  (println (str/join "\n" st)))
+;; (let [e (first (agent-errors bad-agent))
+;;       st (.getStackTrace e)]
+;;   (println (.getMessage e))
+;;   (println (str/join "\n" st)))
 
-(defn run [nvecs nitems nthreads niters]
-  (let [vec-refs (vec (map (comp ref vec)
-                           (partition nitems (range (* nvecs nitems)))))
-        swap #(let [v1 (rand-int nvecs)
-                    v2 (rand-int nvecs)
-                    i1 (rand-int nitems)
-                    i2 (rand-int nitems)]
-                (dosync
-                 (let [temp (nth @(vec-refs v1) i1)]
-                   (alter (vec-refs v1) assoc i1 (nth @(vec-refs v2) i2))
-                   (alter (vec-refs v2) assoc i2 temp))))
-        report #(do
-                  (prn (map deref vec-refs))
-                  (println "Distinct:"
-                           (count (distinct (apply concat (map deref vec-refs))))))]
-    (report)
-    (dorun (apply pcalls (repeat nthreads #(dotimes [_ niters] (swap)))))
-    (report)))
+;; (defn run [nvecs nitems nthreads niters]
+;;   (let [vec-refs (vec (map (comp ref vec)
+;;                            (partition nitems (range (* nvecs nitems)))))
+;;         swap #(let [v1 (rand-int nvecs)
+;;                     v2 (rand-int nvecs)
+;;                     i1 (rand-int nitems)
+;;                     i2 (rand-int nitems)]
+;;                 (dosync
+;;                  (let [temp (nth @(vec-refs v1) i1)]
+;;                    (alter (vec-refs v1) assoc i1 (nth @(vec-refs v2) i2))
+;;                    (alter (vec-refs v2) assoc i2 temp))))
+;;         report #(do
+;;                   (prn (map deref vec-refs))
+;;                   (println "Distinct:"
+;;                            (count (distinct (apply concat (map deref vec-refs))))))]
+;;     (report)
+;;     (dorun (apply pcalls (repeat nthreads #(dotimes [_ niters] (swap)))))
+;;     (report)))
 
-(run 100 10 10 100000)
+;; (run 100 10 10 100000)
 
 
 
