@@ -55,23 +55,50 @@
            (verify-call-times-for log-call 1)
            (verify-first-call-args-for log-call "expenses-greater-than" 15.0)))
 
+;; refactored to include testing macro
+(defmocktest test-filter-greater-than
+             (mocking [log-call]
+                      (let [filtered (expenses-greater-than all-expenses 15.0)]
+                        (testing "the filtering itself works as expected"
+                          (is (= (count filtered) 2))
+                          (is (= (:amount (first filtered)) 20.0))
+                          (is (= (:amount (last filtered)) 30.0))))
+                      (testing "Auditing via log-call works correctly"
+                        (verify-call-times-for log-call 1)
+                        (verify-first-call-args-for log-call "expenses-greater-than" 15.0))))
 
-  ;; experimentation below:
-  ;; (defn ^:dynamic calc-x [x1 x2]
-  ;;   (* x1 x2))
 
-  ;; (defn ^:dynamic calc-y [y1 y2]
-  ;;   (/ y2 y1))
+;; experimentation below:
+;; (defn ^:dynamic calc-x [x1 x2]
+;;   (* x1 x2))
 
-  ;; (defn some-client []
-  ;;   (println (calc-x 2 3) (calc-y 3 4)))
+;; (defn ^:dynamic calc-y [y1 y2]
+;;   (/ y2 y1))
 
-  ;; (macroexpand-1 '(stubbing [calc-x 1
-  ;;                            calc-y 2]
-  ;;                           (some-client)))
+;; (defn some-client []
+;;   (println (calc-x 2 3) (calc-y 3 4)))
 
-  ;; (some-client)
+;; (macroexpand-1 '(stubbing [calc-x 1
+;;                            calc-y 2]
+;;                           (some-client)))
 
-  ;; (stubbing [calc-x 1
-  ;;            calc-y 2]
-  ;;           (some-client))
+;; (some-client)
+
+;; (stubbing [calc-x 1
+;;            calc-y 2]
+;;           (some-client))
+
+;; are macro example usage:
+;(defn to-upper [s]
+;  (.toUpperCase (str s)))
+
+;(deftest test-to-upcase
+;  (is (= "RATHORE" (to-upper "rathore")))
+;  (is (= "1" (to-upper 1)))
+;  (is (= "AMIT" (to-upper "AMIT"))))
+
+;(deftest test-to-upcase
+;  (are [l u] (= u (to-upper l))
+;             "RATHORE" "RATHORE"
+;             "1" "1"
+;             "amit" "AMIT"))

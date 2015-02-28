@@ -160,7 +160,7 @@
 
 ;; (macroexpand-1 `(1 2 ~(list 3 4)))
 ;; (macroexpand-1 `(1 2 ~@(list 3 4)))
-;; (macroexpand '(+ 1 ~@(reverse `(+ 1 1))))
+;(macroexpand '(+ 1 ~@(reverse `(+ 1 1))))
 ;; (reverse '(+ 1 1))
 ;; (map reverse '((+ 1 1) (+ 2 2) (+ 3 3)))
 

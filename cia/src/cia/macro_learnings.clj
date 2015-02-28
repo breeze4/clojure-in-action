@@ -14,14 +14,14 @@
     val
     element))
 
-(replace-if-underscore '_ 1) ; => 1
-(replace-if-underscore '+ 1) ; => +
+(replace-if-underscore '_ 1)
+(replace-if-underscore '+ 1)
 
 (defn replace-underscores [form val]
   (map #(replace-if-underscore % val) form))
 
-(replace-underscores '(+ 2 _) 1) ; => (+ 2 1)
-(replace-underscores '(+ 2 3) 1) ; => (+ 2 3)
+(replace-underscores '(+ 2 _) 1)
+(replace-underscores '(+ 2 3) 1)
 
 (defn convert-forms [val [next-form & other-forms]]               ; 1
   (if (nil? next-form)                                            ; 2
@@ -44,3 +44,10 @@
     (+ 3 _)     ; previous result of 3, (+ 3 3)
     (- 50 _)    ; previous result of 6, (- 50 6)
     (/ _ 2))    ; previous result of 44, (/ 40 2) => final result: 22
+
+(macroexpand-1 '(->>> 1       ; initial value of 1
+                      (+ _ 2)     ; with previous result of 1, semantically looks like: (+ 1 2)
+                      (+ 3 _)     ; previous result of 3, (+ 3 3)
+                      (- 50 _)    ; previous result of 6, (- 50 6)
+                      (/ _ 2)))
+
