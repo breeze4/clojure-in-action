@@ -45,4 +45,3 @@
 ;        (where {:id 2}))
 
 ;(delete users (where {:id 5}))
-;;
