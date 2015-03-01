@@ -4,5 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/data.json "0.2.5"]]
+                 [org.clojure/data.json "0.2.5"]
+                 [org.xerial/sqlite-jdbc "3.8.7"]
+                 [korma "0.4.0"]]
   :plugins [[com.jakemccrary/lein-test-refresh "0.6.0"]])

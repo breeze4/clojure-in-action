@@ -23,12 +23,12 @@
 (replace-underscores '(+ 2 _) 1)
 (replace-underscores '(+ 2 3) 1)
 
-(defn convert-forms [val [next-form & other-forms]]               ; 1
-  (if (nil? next-form)                                            ; 2
+(defn convert-forms [val [next-form & other-forms]]         ; 1
+  (if (nil? next-form)                                      ; 2
     val
-    (let [next-val (gensym)]                                      ; 3
-      `(let [~next-val ~(replace-underscores next-form val)]      ; 4
-         ~(convert-forms next-val other-forms)))))                ; 5
+    (let [next-val (gensym)]                                ; 3
+      `(let [~next-val ~(replace-underscores next-form val)] ; 4
+         ~(convert-forms next-val other-forms)))))          ; 5
 
 (convert-forms 2 '((+ _ 1) (+ 4 _)))
 ; =>
@@ -39,15 +39,16 @@
 (defmacro ->>> [init & forms]
   (convert-forms init forms))
 
-(->>> 1       ; initial value of 1
-    (+ _ 2)     ; with previous result of 1, semantically looks like: (+ 1 2)
-    (+ 3 _)     ; previous result of 3, (+ 3 3)
-    (- 50 _)    ; previous result of 6, (- 50 6)
-    (/ _ 2))    ; previous result of 44, (/ 40 2) => final result: 22
+(->>> 1
+      (+ _ 2)
+      (+ 3 _)
+      (- 50 _)
+      (/ _ 2))
 
-(macroexpand-1 '(->>> 1       ; initial value of 1
-                      (+ _ 2)     ; with previous result of 1, semantically looks like: (+ 1 2)
-                      (+ 3 _)     ; previous result of 3, (+ 3 3)
-                      (- 50 _)    ; previous result of 6, (- 50 6)
+(macroexpand-1 '(->>> 1
+                      (+ _ 2)
+                      (+ 3 _)
+                      (- 50 _)
                       (/ _ 2)))
+
 
