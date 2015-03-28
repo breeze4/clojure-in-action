@@ -43,3 +43,11 @@
   (let [batch (slurp file)
         stmts (.split batch ";\r\n")]
     (map #(sql/db-do-prepared db-spec %) stmts)))
+
+; just learned this as->
+(defn exec-sql-file-as [file]
+  "Reads in the script file and splits into statements to be executed individually in order
+ Splits on \";\r\n\" which is probably dumb and incompatible on other OSes than Windows :)"
+  (as-> (slurp file) $
+        (.split $ ";\r\n")
+        (map #(sql/db-do-prepared db-spec %) $)))
